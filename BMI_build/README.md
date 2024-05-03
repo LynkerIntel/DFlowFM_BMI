@@ -5,8 +5,7 @@ Author: Jason Ducker, Lynker Technologies LLC., Affiliate for Office of Water Pr
 
 Current use of DFlowFM BMI: Integration of this coastal model as BMI formulation within the NOAA Office of Water Predicition within the Next Generation Water Resources Framework project.
 
-# Requirements for compiling DFLOWFM and BMI libraries, currently setup for the RDHPCS NOAA Hera cluster
-# to be correctly compiled and linked to BMI shared libraries
+# Requirements for compiling DFLOWFM and BMI libraries, currently setup for the RDHPCS NOAA Hera cluster to be correctly compiled and linked to BMI shared libraries
 1. cmake >= 3.20
 2. szip >= 2.1
 3. intel >= 2018
