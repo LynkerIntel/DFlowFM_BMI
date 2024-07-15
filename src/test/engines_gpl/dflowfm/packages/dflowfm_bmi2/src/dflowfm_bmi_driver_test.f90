@@ -24,6 +24,7 @@ program dflowfm_driver_test
   use dfm_error
   use m_ec_support  
   use m_ec_item
+  use m_observations
   implicit none
 
   !---------------------------------------------------------------------
@@ -68,6 +69,7 @@ program dflowfm_driver_test
     double precision, allocatable                    :: grid_x_mesh(:), grid_x_wlbnd(:), grid_x_qbnd(:) ! X coordinate of grid nodes (change dims if multiple nodes)
     double precision, allocatable                    :: grid_y_mesh(:), grid_y_wlbnd(:), grid_y_qbnd(:) ! Y coordinate of grid nodes (change dims if multiple nodes)
     double precision, allocatable                    :: grid_z_mesh(:), grid_z_wlbnd(:), grid_z_qbnd(:) ! Z coordinate of grid nodes (change dims if multiple nodes)
+    double precision, allocatable                    :: grid_x_station(:), grid_y_station(:) ! .xyn station coordinates for T-Route for two-way coupling
     integer                                           :: grid_node_count ! Get the number of nodes in the grid
     integer                                           :: grid_edge_count ! Get the number of edges in the grid
     integer                                           :: grid_face_count ! Get the number of faces in the grid
@@ -85,6 +87,7 @@ program dflowfm_driver_test
     double precision, allocatable            :: SFCPRS_t0(:), SFCPRS_t1(:), TMP2m_t0(:), TMP2m_t1(:)
     double precision, allocatable            :: UU10m_t0(:), UU10m_t1(:), VV10m_t0(:), VV10m_t1(:)
     double precision, allocatable            :: SPFH2m_t0(:), SPFH2m_t1(:), RAINRATE_t0(:), RAINRATE_t1(:), LATQ_t0(:), LATQ_t1(:)
+    double precision, allocatable            :: stations(:)
     real(hp), dimension(:),     pointer :: ec_values
 
     type(tEcFileReader), pointer             :: fileReaderPtr         !< helper pointer for a file reader
@@ -348,11 +351,44 @@ program dflowfm_driver_test
     ! Loop through the output vars
     ! and just test get value functionality
     do iBMI = 1, n_outputs
-      status = m%get_value(trim(names_outputs(iBMI)), var_value_get)
-      print*, trim(names_outputs(iBMI)), " from get_value = ", var_value_get
+      if(trim(names_outputs(iBMI)) .ne. 'TROUTE_ETA2') then
+          status = m%get_value(trim(names_outputs(iBMI)), var_value_get)
+          print*, trim(names_outputs(iBMI)), " from get_value = ", var_value_get
+      endif
     end do
 
     deallocate(var_value_get)
+
+  ! Check the T-Route water level information output from the .xyn station method
+  if(numobs > 0) then
+      allocate(grid_x_station(numobs))
+      allocate(grid_y_station(numobs))
+      allocate(stations(numobs))
+
+        status = m%get_var_grid('TROUTE_ETA2', grid_int)
+        print*, "The integer value for the ", 'TROUTE_ETA2', " grid is ", grid_int
+
+        ! get_grid_type
+        status = m%get_grid_type(grid_int, grid_type)
+        print*, "The grid type for ", 'TROUTE_ETA2', " is ", trim(grid_type)
+
+        ! get_grid_rank
+        status = m%get_grid_rank(grid_int, grid_rank)
+
+        status = m%get_grid_x(grid_int, grid_x_station)
+        status = m%get_grid_y(grid_int, grid_y_station)
+
+        print*, "The X coord for grid ", grid_int, " is ", grid_x_station(:)
+        print*, "The Y coord for grid ", grid_int, " is ", grid_y_station(:)
+
+        status = m%get_value("TROUTE_ETA2", stations)
+        print*, "TROUTE_ETA2 from get_value = ", stations
+        
+        deallocate(grid_x_station)
+        deallocate(grid_y_station)
+        deallocate(stations)
+  endif
+
 
   ! Check to see if offshore water level boundaries are allocated for DFlowFM setup
   if(nbndz > 0) then

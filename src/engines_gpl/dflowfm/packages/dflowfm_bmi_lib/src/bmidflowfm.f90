@@ -22,6 +22,7 @@ module bmidflowfm
   use check_mpi_env
   use m_ec_module
   use m_ec_provider
+  use m_observations
   use m_meteo
   use dfm_error
 
@@ -121,7 +122,7 @@ module bmidflowfm
 
   ! Exchange items
   integer, parameter :: input_item_count = 22
-  integer, parameter :: output_item_count = 4
+  integer, parameter :: output_item_count = 5
   character (len=BMI_MAX_VAR_NAME), target, &
        dimension(input_item_count) :: input_items
   character (len=BMI_MAX_VAR_NAME), target, &
@@ -280,6 +281,7 @@ end subroutine read_init_config
     output_items(2) = 'VY'      ! current vector velocity in northward direction (m/s)
     output_items(3) = 'VX'      ! current vector velocity in eastward direction (m/s)
     output_items(4) = 'BL'      ! Bedlevel at flow node (m)
+    output_items(5) = "TROUTE_ETA2" ! Total water level (m) at observation stations corresponding to 2-way coupling T-Route locations
 
     names => output_items
     bmi_status = BMI_SUCCESS
@@ -442,7 +444,7 @@ end function dflowfm_finalizer
     integer :: bmi_status
 
     select case(name)
-    case('ETA2','VY','VX','BL','ETA2_bnd_t0_left','Q_bnd_t0_left','VY_bnd_t0_left','VX_bnd_t0_left','ETA2_bnd_t0_right','Q_bnd_t0_right','VY_bnd_t0_right','VX_bnd_t0_right','RAINRATE_t0','LATQ_t0','SFCPRS_t0','UU10m_t0','VV10m_t0','ETA2_bnd_t1_left','Q_bnd_t1_left','VY_bnd_t1_left','VX_bnd_t1_left','ETA2_bnd_t1_right','Q_bnd_t1_right','VY_bnd_t1_right','VX_bnd_t1_right', 'RAINRATE_t1','LATQ_t1','SFCPRS_t1','UU10m_t1','VV10m_t1')
+    case('ETA2','TROUTE_ETA2','VY','VX','BL','ETA2_bnd_t0_left','Q_bnd_t0_left','VY_bnd_t0_left','VX_bnd_t0_left','ETA2_bnd_t0_right','Q_bnd_t0_right','VY_bnd_t0_right','VX_bnd_t0_right','RAINRATE_t0','LATQ_t0','SFCPRS_t0','UU10m_t0','VV10m_t0','ETA2_bnd_t1_left','Q_bnd_t1_left','VY_bnd_t1_left','VX_bnd_t1_left','ETA2_bnd_t1_right','Q_bnd_t1_right','VY_bnd_t1_right','VX_bnd_t1_right', 'RAINRATE_t1','LATQ_t1','SFCPRS_t1','UU10m_t1','VV10m_t1')
        type = "double precision"
        bmi_status = BMI_SUCCESS
     case default
@@ -469,7 +471,7 @@ end function dflowfm_finalizer
     case("UU10m_t0", "VV10m_t0","UU10m_t1", "VV10m_t1",'VX','VY','VX_bnd_t0_left','VY_bnd_t0_left','VX_bnd_t1_left','VY_bnd_t1_left', 'VX_bnd_t0_right','VY_bnd_t0_right','VX_bnd_t1_right','VY_bnd_t1_right')
        units = "m s-1"
        bmi_status = BMI_SUCCESS
-    case("ETA2",'BL','ETA2_bnd_t0_left','ETA2_bnd_t1_left', 'ETA2_bnd_t0_right','ETA2_bnd_t1_right')
+    case("ETA2",'TROUTE_ETA2','BL','ETA2_bnd_t0_left','ETA2_bnd_t1_left', 'ETA2_bnd_t0_right','ETA2_bnd_t1_right')
        units = "m"
        bmi_status = BMI_SUCCESS
     case('Q_bnd_t0_left','Q_bnd_t1_left', 'Q_bnd_t0_right','Q_bnd_t1_right','LATQ_t0','LATQ_t1')
@@ -490,7 +492,7 @@ end function dflowfm_finalizer
     integer :: bmi_status
 
     select case(name)
-    case('ETA2','BL','VY','VX','RAINRATE_t0','RAINRATE_t1','SFCPRS_t0','SFCPRS_t1')
+    case('ETA2','TROUTE_ETA2','BL','VY','VX','RAINRATE_t0','RAINRATE_t1','SFCPRS_t0','SFCPRS_t1')
        location = "node"
        bmi_status = BMI_SUCCESS
     case('UU10m_t0','VV10m_t0','UU10m_t1','VV10m_t1')
@@ -532,6 +534,9 @@ end function dflowfm_finalizer
     case('LATQ_t0','LATQ_t1')
        grid = 7
        bmi_status = BMI_SUCCESS
+    case('TROUTE_ETA2')
+       grid = 8
+       bmi_status = BMI_SUCCESS
     case default
        grid = -1
        bmi_status = BMI_FAILURE
@@ -554,19 +559,22 @@ end function dflowfm_finalizer
        rank = 2
        bmi_status = BMI_SUCCESS
     case(3)
-       rank = 1
+       rank = 2
        bmi_status = BMI_SUCCESS
     case(4)
-       rank = 1
+       rank = 2
        bmi_status = BMI_SUCCESS  
     case(5)
-       rank = 1
+       rank = 2
        bmi_status = BMI_SUCCESS
     case(6)
-       rank = 1
+       rank = 2
        bmi_status = BMI_SUCCESS
     case(7)
-       rank = 1
+       rank = 2
+       bmi_status = BMI_SUCCESS
+    case(8)
+       rank = 2
        bmi_status = BMI_SUCCESS
     case default
        rank = -1
@@ -602,6 +610,9 @@ end function dflowfm_finalizer
        bmi_status = BMI_SUCCESS
     case(7)
        size = numlatsg
+       bmi_status = BMI_SUCCESS
+    case(8)
+       size = numobs
        bmi_status = BMI_SUCCESS
     case default
        size = -1
@@ -713,6 +724,9 @@ end function dflowfm_finalizer
        enddo
        x(:) = bnd(:)
        bmi_status = BMI_SUCCESS
+    case(8)
+       x(:) = xobs(:)
+       bmi_status = BMI_SUCCESS
     case default
        x(:) = -1.d0
        bmi_status = BMI_FAILURE
@@ -760,6 +774,9 @@ end function dflowfm_finalizer
            READ(lat_ids(iitem),*) bnd(iitem)
        enddo
        y(:) = bnd(:)
+       bmi_status = BMI_SUCCESS
+    case(8)
+       y(:) = yobs(:)
        bmi_status = BMI_SUCCESS
     case default
        y(:) = -1.d0
@@ -955,7 +972,7 @@ end function dflowfm_finalizer
     case(1,2)
        type = "unstructured"
        bmi_status = BMI_SUCCESS
-    case(3,4,5,6)
+    case(3,4,5,6,7,8)
        type = "points"
        bmi_status = BMI_SUCCESS
     case default
@@ -975,6 +992,9 @@ end function dflowfm_finalizer
     select case(name)
     case("ETA2")
        size = sizeof(s1)
+       bmi_status = BMI_SUCCESS
+    case("TROUTE_ETA2")
+       size = sizeof(valobs(IPNT_S1,:))
        bmi_status = BMI_SUCCESS
     case("BL")
        size = sizeof(bl)
@@ -2158,6 +2178,9 @@ end function dflowfm_finalizer
     case("ETA2")
       dest = [s1]
       bmi_status=BMI_SUCCESS
+    case("TROUTE_ETA2")
+      dest = [valobs(IPNT_S1,:)]
+      bmi_status=BMI_SUCCESS
     case("BL")
       dest = [bl]
       bmi_status=BMI_SUCCESS
@@ -2266,6 +2289,11 @@ end function dflowfm_finalizer
     case("ETA2")
       do i = 1, size(inds)
           dest(i) = s1(inds(i))
+      enddo
+      bmi_status=BMI_SUCCESS
+    case("TROUTE_ETA2")
+      do i = 1, size(inds)
+          dest(i) = valobs(IPNT_S1,(inds(i)))
       enddo
       bmi_status=BMI_SUCCESS
     case("BL")
