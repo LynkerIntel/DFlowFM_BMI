@@ -5,7 +5,7 @@ Author: Jason Ducker, Lynker Technologies LLC., Affiliate for Office of Water Pr
 
 Current use of DFlowFM BMI: Integration of this coastal model as BMI formulation within the NOAA Office of Water Predicition within the Next Generation Water Resources Framework project.
 
-# Requirements for compiling DFLOWFM and BMI libraries, currently setup for the RDHPCS NOAA Hera cluster to be correctly compiled and linked to BMI shared libraries
+# Requirements for compiling DFLOWFM Model Engine Version and BMI libraries
 1. cmake >= 3.20
 2. szip >= 2.1
 3. intel >= 2018
@@ -29,8 +29,8 @@ https://content.oss.deltares.nl/delft3d/D-Flow_FM_User_Manual.pdf
 5. The sample "namelist.input" file inside the $root/BMI_build directory serves as the BMI configuration file for DFlowFM that should be copied over to your model directory for testing along with the driver executable.
 
 # DflowFM BMI code and driver directories inside model engine repository
-1. BMI: $root/src/engines_gpl/dflowfm/packages/dflowfm_bmi_lib/src
-1. Driver: $root/src/test/engines_gpl/dflowfm/packages/dflowfm_bmi2/src
+1. BMI: $DFlowFM_root/src/engines_gpl/dflowfm/packages/dflowfm_bmi_lib/src
+1. Driver: $DFlowFM_root/src/test/engines_gpl/dflowfm/packages/dflowfm_bmi2/src
 
 # Current Limitations of DFlowFM BMI implementation & To Do Work
 1. MPI Parallelization has not be implemented properly within the DFlowFM BMI
