@@ -244,10 +244,10 @@ end subroutine read_init_config
     character (*), pointer, intent(out) :: names(:)
     integer :: bmi_status
 
-    input_items(1) = 'Q_bnd_t0_right'    ! Discharge land boundary sources at t0 (m^3/s) right weight
-    input_items(2) = 'Q_bnd_t1_right'    ! Discharge land boundary sources at t1 (m^3/s) right weight
-    input_items(3) = 'Q_bnd_t0_left'    ! Discharge land boundary sources at t0 (m^3/s) left weight
-    input_items(4) = 'Q_bnd_t1_left'    ! Discharge land boundary sources at t1 (m^3/s) left weight
+    input_items(1) = 'Q_bnd_t0_right'    ! Point Discharge (.pli method) land boundary sources at t0 (m^3/s) right weight
+    input_items(2) = 'Q_bnd_t1_right'    ! Point Discharge (.pli method) land boundary sources at t1 (m^3/s) right weight
+    input_items(3) = 'Q_bnd_t0_left'    ! Point Discharge (.pli method) land boundary sources at t0 (m^3/s) left weight
+    input_items(4) = 'Q_bnd_t1_left'    ! Point Discharge (.pli method) land boundary sources at t1 (m^3/s) left weight
     input_items(5) = 'ETA2_bnd_t0_right' ! Open boundary water levels at t0 (m) left weight
     input_items(6) = 'ETA2_bnd_t1_right' ! Open boundary water levels at t1 (m) left weight
     input_items(7) = 'ETA2_bnd_t0_left' ! Open boundary water levels at t0 (m) right weight
@@ -264,8 +264,8 @@ end subroutine read_init_config
     input_items(18) = 'VV10m_t1'    ! 10m wind speed in northward direction at t1 (m/s)
     input_items(19) = 'RAINRATE_t0' ! Precipitation rate at t0 (kg/m^2s)
     input_items(20) = 'RAINRATE_t1' ! Precipitation rate at t1 (kg/m^2s)    
-    input_items(21) = 'LATQ_t0' ! Lateral discharge at t0 (m^3/s)
-    input_items(22) = 'LATQ_t1' ! Lateral discharge at t1 (m^3/s)
+    input_items(21) = 'LATQ_t0' ! Lateral discharge (contribution of either semi-circle polygon inland boundary discharges and/or surface runoff estimates from a model) at t0 (m^3/s)
+    input_items(22) = 'LATQ_t1' ! Lateral discharge (contribution of either semi-circle polygon inland boundary discharges and/or surface runoff estimates from a model) at t1 (m^3/s)
 
     names => input_items
     bmi_status = BMI_SUCCESS
